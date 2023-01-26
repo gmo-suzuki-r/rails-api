@@ -13,11 +13,17 @@ RSpec.describe ArticlesController do
       get "/articles"
       expect(json_data.length).to eq(1)
       expected = json_data.first
-      aggregate_failures do
-        expect(expected[:id]).to eq(article.id.to_s)
-        expect(expected[:type]).to eq("article")
-        expect(expected[:attributes]).to eq(title: article.title, content: article.content, slug: article.slug)
-      end
+      expect(expected[:id]).to eq(article.id.to_s)
+      expect(expected[:type]).to eq("article")
+      expect(expected[:attributes]).to eq(title: article.title, content: article.content, slug: article.slug)
+    end
+
+    it "returns articles in the proper order" do
+      older_article = create(:article, created_at: 1.hour.ago)
+      recent_article = create(:article)
+      get "/articles"
+      ids = json_data.map { |item| item[:id].to_i }
+      expect(ids).to eq([recent_article.id, older_article.id])
     end
   end
 end
